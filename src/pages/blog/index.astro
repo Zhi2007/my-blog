@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+
+const posts = (
+  await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true))
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="全部文章" description="按时间倒序排列的全部文章">
+  <section class="hero">
+    <h1>全部文章</h1>
+    <p>共 {posts.length} 篇</p>
+  </section>
+  <PostList posts={posts} />
+</BaseLayout>

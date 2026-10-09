@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title="关于" description={`关于 ${SITE.title}`}>
+  <section class="hero">
+    <h1>关于</h1>
+  </section>
+
+  <article>
+    <p>你好，我是{SITE.author}。这里是我的个人博客，用来记录技术笔记、读书笔记和一些随想。</p>
+    <p>本站是纯静态站点：用 <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> 构建，
+      部署在 <a href="https://developers.cloudflare.com/workers/static-assets/" target="_blank" rel="noopener">Cloudflare Workers 静态资源</a> 上，
+      自动 HTTPS、全球 CDN，成本为零。</p>
+
+    <h2>联系我</h2>
+    <ul>
+      <li>GitHub：<a href="https://github.com/" target="_blank" rel="noopener">@yourname</a></li>
+      <li>邮箱：<a href="mailto:you@example.com">you@example.com</a></li>
+    </ul>
+
+    <p><em>提示：这段文字在 src/pages/about.astro 里，改成你自己的介绍即可。</em></p>
+  </article>
+</BaseLayout>

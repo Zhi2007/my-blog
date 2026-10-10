@@ -25,7 +25,7 @@ export const GISCUS = {
   /** Discussions 里的分类名，要和 giscus.app 里选的保持一致 */
   category: 'Comments',
   /** ← 关键：在 giscus.app 生成后把 data-category-id 填到这里 */
-  categoryId: '',
+  categoryId: 'DIC_kwDOVCbYDs4DHdxL',
   /** 文章与讨论的对应方式：pathname 表示按页面路径一一对应 */
   mapping: 'pathname',
   inputPosition: 'bottom',

@@ -1,0 +1,78 @@
+---
+import { GISCUS } from '../consts';
+
+// repoId 和 categoryId 都拿到之后才会真正挂载评论区；否则只显示配置提示
+const configured = Boolean(GISCUS.repoId && GISCUS.categoryId);
+---
+
+<section class="comments" id="comments" data-pagefind-ignore>
+  <h2 class="comments-title">评论</h2>
+
+  {
+    configured ? (
+      <div class="giscus" id="giscus-container" />
+    ) : (
+      <p class="comments-hint">
+        评论区还没配置完成：打开 <a href="https://giscus.app/zh-CN" target="_blank" rel="noopener">giscus.app</a>
+        ，填入仓库 <code>{GISCUS.repo}</code>、Mapping 选 <code>pathname</code>、选好讨论分类，
+        再把生成的 <code>data-category-id</code> 填到 <code>src/consts.ts</code> 的
+        <code>GISCUS.categoryId</code>。详细步骤见 README 的「评论」一节。
+      </p>
+    )
+  }
+</section>
+
+<script type="application/json" id="giscus-config" set:html={JSON.stringify(GISCUS)} />
+
+<script>
+  const container = document.getElementById('giscus-container');
+  const configEl = document.getElementById('giscus-config');
+
+  if (container && configEl) {
+    const cfg = JSON.parse(configEl.textContent || '{}');
+
+    const mount = () => {
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+
+      const attrs = {
+        'data-repo': cfg.repo,
+        'data-repo-id': cfg.repoId,
+        'data-category': cfg.category,
+        'data-category-id': cfg.categoryId,
+        'data-mapping': cfg.mapping || 'pathname',
+        'data-strict': '0',
+        'data-reactions-enabled': '1',
+        'data-emit-metadata': '0',
+        'data-input-position': cfg.inputPosition || 'bottom',
+        // 跟随系统/浏览器的深浅色设置，和本站主题一致
+        'data-theme': 'preferred_color_scheme',
+        'data-lang': cfg.lang || 'zh-CN',
+        'data-loading': 'lazy',
+      };
+
+      for (const [key, value] of Object.entries(attrs)) {
+        script.setAttribute(key, value);
+      }
+      container.appendChild(script);
+    };
+
+    // 滚到评论区附近再加载第三方脚本，避免拖慢正文
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            mount();
+          }
+        },
+        { rootMargin: '400px' },
+      );
+      observer.observe(container);
+    } else {
+      mount();
+    }
+  }
+</script>

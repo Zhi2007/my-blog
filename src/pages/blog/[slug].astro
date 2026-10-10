@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Comments from '../../components/Comments.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) =>
@@ -37,4 +38,6 @@ const fmt = (d: Date) =>
 
     <a class="back-link" href="/blog/" data-pagefind-ignore>← 返回文章列表</a>
   </article>
+
+  <Comments />
 </BaseLayout>

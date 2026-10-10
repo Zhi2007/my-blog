@@ -10,7 +10,7 @@
 | 框架 | [Astro 7](https://astro.build)（默认静态输出，`dist/` 里全是纯 HTML/CSS） |
 | 内容 | Astro 内容集合（Content Collections），文章就是 `src/content/blog/*.md` |
 | 搜索 | [Pagefind](https://pagefind.app) 1.5：构建时扫一遍 HTML 生成静态索引，浏览器里检索，**不需要服务器或数据库** |
-| 评论 | 未内置，可自行接 Giscus（零维护，需 GitHub 账号）或 Waline / Workers+D1（访客免登录） |
+| 评论 | [Giscus](https://giscus.app)：基于 GitHub Discussions，评论存在自己仓库里，**不需要服务器**；访客需登录 GitHub |
 | 托管 | Cloudflare Workers 静态资源（`wrangler deploy`，免费额度：每天 10 万请求、2 万个静态文件） |
 | 附加能力 | `/rss.xml` 订阅、`sitemap-index.xml` 站点地图、站内搜索、404 页面 |
 
@@ -29,6 +29,7 @@ my-blog/
    ├─ content/blog/*.md      # 文章本体
    ├─ layouts/BaseLayout.astro   # 全站 HTML 骨架（head、导航、页脚）
    ├─ components/PostList.astro  # 文章列表组件
+   ├─ components/Comments.astro  # Giscus 评论区（滚动到附近才加载）
    ├─ pages/
    │  ├─ index.astro         # 首页（最新 8 篇）
    │  ├─ blog/index.astro    # 全部文章
@@ -130,7 +131,36 @@ https://my-blog.<你的 workers.dev 子域>.workers.dev
 - **Web Analytics**：免费，无需在页面里塞第三方统计脚本。
 - 想连 Git 自动部署：Workers & Pages 里连接 GitHub 仓库，构建命令 `npm run build`、输出目录 `dist`，以后 `git push` 即上线。
 
-## 5. 改成你自己的样子
+## 5. 评论（Giscus，已接入）
+
+文章页底部的评论区用 [Giscus](https://giscus.app) 实现：评论以 GitHub Discussions 的形式存在**你自己的仓库**里，前端只是一个 iframe，不需要服务器、不需要数据库、也没有第三方账号。
+
+### 还需要你手动做 4 步（约 3 分钟）
+
+1. **给仓库装 giscus App**：打开 <https://github.com/apps/giscus> → Install → 选择 `Zhi2007/my-blog`（只勾这一个仓库最安全）。
+2. **开启 Discussions**：仓库 → Settings → General → Features → 勾上 **Discussions**。
+3. **建一个讨论分类**：仓库 → Discussions → Categories 旁的编辑按钮 → New category，名字填 `Comments`，类型选 **Announcements**（只有维护者能发起新讨论，能挡掉一部分垃圾内容）。
+4. **拿 categoryId 并填进来**：打开 <https://giscus.app/zh-CN>，Repository 填 `Zhi2007/my-blog`，Discussion Category 选刚建的 `Comments`，Mapping 选 `pathname`；页面下方会生成一段 `<script>`，把里面的 `data-category-id`（形如 `DIC_kwDOVCbYDs4C...`）复制到 `src/consts.ts` 的 `GISCUS.categoryId`。
+
+改完提交推送即可：
+
+```sh
+git add .
+git commit -m "配置 Giscus 评论"
+git push
+```
+
+> `GISCUS.categoryId` 为空时，文章页只显示一段配置提示，不会报错；填好后自动变成真实评论区。
+
+### 说明与注意
+
+- **仓库必须保持 public**：Giscus 用公开仓库的 Discussions 存评论，转成私有后评论区会失效。
+- **访客需要 GitHub 账号**才能评论（技术博客通常没问题）。
+- **评论区懒加载**：滚动到页面底部附近才请求 `giscus.app`，不拖慢正文；主题跟随系统深浅色（`preferred_color_scheme`）。
+- **管理评论**：直接在仓库的 Discussions 里回复、删除、锁定，没有额外后台。
+- 如果读者主要在国内且大多没有 GitHub 账号，可以换成 **Cloudflare Workers + D1** 自建评论（访客免登录、数据也在你自己账号里），跟我说一声即可。
+
+## 6. 改成你自己的样子
 
 | 想改什么 | 改哪里 |
 | --- | --- |
@@ -162,6 +192,9 @@ https://my-blog.<你的 workers.dev 子域>.workers.dev
 /pagefind/pagefind.js
   Content-Type: text/javascript
 ```
+
+**文章页底部没有评论区，或者一直转圈**
+① 确认已给仓库安装 giscus App 并开启了 Discussions；② 确认 `src/consts.ts` 里 `GISCUS.categoryId` 已填写、且和 giscus.app 生成的一致；③ 评论区依赖 `giscus.app` 与 `github.com`，国内网络可能需要代理——加载失败只影响评论区，正文照常。
 
 **`wrangler deploy` 提示 Worker 名称被占用**
 改 `wrangler.jsonc` 的 `name`。名称决定 `*.workers.dev` 子域，全局唯一。

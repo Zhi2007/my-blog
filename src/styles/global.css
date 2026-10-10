@@ -186,6 +186,27 @@ article hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; 
   color: inherit;
 }
 
+/* 评论区（Giscus 的 iframe 由第三方脚本注入，外层样式放这里） */
+.comments { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); }
+.comments-title { margin: 0 0 16px; font-size: 1.15rem; }
+.comments-hint {
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--fg-muted);
+  font-size: 0.92rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.comments-hint code {
+  padding: 1px 5px;
+  font-family: var(--mono);
+  font-size: 0.88em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
 @media (max-width: 600px) {
   body { font-size: 16px; }
   .hero h1 { font-size: 1.6rem; }

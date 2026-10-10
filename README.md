@@ -8,6 +8,7 @@
 | 部分 | 说明 |
 | --- | --- |
 | 框架 | [Astro 7](https://astro.build)（默认静态输出，`dist/` 里全是纯 HTML/CSS） |
+| 界面 | Firefly / Fuwari 风格：OKLCH 主题色（改一个 `--hue` 换整套配色）+ 全屏壁纸 + 浮动胶囊导航 + 横幅 + 毛玻璃卡片 |
 | 内容 | Astro 内容集合（Content Collections），文章就是 `src/content/blog/*.md` |
 | 搜索 | [Pagefind](https://pagefind.app) 1.5：构建时扫一遍 HTML 生成静态索引，浏览器里检索，**不需要服务器或数据库** |
 | 代码块 | [Expressive Code](https://expressive-code.com)：复制按钮、语言标签、行号，深浅两套主题自动跟随系统 |
@@ -248,6 +249,35 @@ export const AWAY_TITLES = ['喂，别走啊 👀', '快回来看看嘛', '页�
 - 用 Page Visibility API 判断访客是否切走：离开时每 2.5 秒轮播一条，回来立刻恢复原标题
 - 数组留空就不启用；想换成「(1) 新消息」之类只改这个数组
 - 组件在 `src/components/TabTitle.astro`
+
+## 9. 界面风格（Firefly / Fuwari 风）
+
+配色体系参考 [Firefly](https://github.com/CuteLeaf/Firefly) / Fuwari：所有颜色用 **OKLCH 从一个色相变量派生**，改一个数字就换整套配色。
+
+```ts
+// src/consts.ts
+export const SITE = {
+  title: '我的博客',
+  subtitle: '首页横幅上的副标题',
+  hue: 165,          // 主题色相 0-360：165 青绿 / 200 青蓝 / 250 蓝紫 / 345 粉 / 30 橙
+  bannerImage: '',   // 图片放 public/ 后填 '/wallpaper.webp'；留空用主题色渐变
+};
+```
+
+页面骨架在 `src/layouts/BaseLayout.astro`：
+
+- `.wallpaper`：固定全屏壁纸（主题色渐变，或你的图片 + 半透明遮罩 + 模糊）
+- `.navbar`：顶部**浮动胶囊导航栏**（毛玻璃、圆角、阴影，滚动时常驻）
+- `.banner`：横幅，承载页面大标题与副标题（首页用 `bannerLarge` 更高）
+- `.content-card`：内容卡片，向上覆盖横幅一段，半透明 + 毛玻璃
+- `.site-footer`：页脚卡片（内含时间进度）
+
+想换配色：只改 `SITE.hue`。想换背景：图片放 `public/`，填 `SITE.bannerImage`（建议 ≤ 300 KB 的 WebP）。
+想微调：变量都在 `src/styles/global.css` 顶部的 `:root` 与暗色 `@media` 块里（圆角 `--radius-*`、阴影 `--shadow-*`、页面宽度 `--page-width`、横幅高度 `--banner-height`）。
+
+> 页面标题现在显示在**横幅**上，所以各页面里不再写自己的 `<h1>`；横幅的 h1 标了 `data-pagefind-meta="title"`，保证站内搜索的标题仍然正确。
+
+与原版 Firefly 的差距（本项目只移植了外观，没搬功能）：Live2D 看板娘、相册/画廊、音乐播放器、友链、文章目录、相关文章、沉浸阅读等一概没有；搜索/评论/统计/时间进度用的是我们自己那套，体积也更小（首屏约 12 KB）。
 
 ## 常见问题
 

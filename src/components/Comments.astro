@@ -43,7 +43,8 @@ const configured = Boolean(GISCUS.repoId && GISCUS.categoryId);
         'data-category': cfg.category,
         'data-category-id': cfg.categoryId,
         'data-mapping': cfg.mapping || 'pathname',
-        'data-strict': '0',
+        // 1 = 标题严格匹配：避免 /blog/hello/ 误匹配到 /blog/hello-world/ 的讨论
+        'data-strict': '1',
         'data-reactions-enabled': '1',
         'data-emit-metadata': '0',
         'data-input-position': cfg.inputPosition || 'bottom',

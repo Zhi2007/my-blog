@@ -1,0 +1,99 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout title="搜索" description={`搜索 ${SITE.title} 的全部文章内容`}>
+  <section class="hero">
+    <h1>搜索</h1>
+    <p>输入关键词搜索全部文章，支持中文词、多词组合，以及用引号做精确匹配</p>
+  </section>
+
+  <div class="search-box">
+    <input
+      id="search-input"
+      class="search-input"
+      type="search"
+      placeholder="例如：Cloudflare、域名、Markdown"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <p id="search-status" class="search-status">输入关键词开始搜索</p>
+    <ul id="search-results" class="search-results"></ul>
+  </div>
+</BaseLayout>
+
+<script>
+  const input = document.getElementById('search-input');
+  const statusEl = document.getElementById('search-status');
+  const listEl = document.getElementById('search-results');
+
+  let pagefind = null;
+  let failed = false;
+
+  async function loadPagefind() {
+    if (pagefind || failed) return pagefind;
+    try {
+      // 索引由 `npm run build` 里的 pagefind 命令生成；开发模式下不存在
+      pagefind = await import(/* @vite-ignore */ '/pagefind/pagefind.js');
+      await pagefind.init();
+      return pagefind;
+    } catch (err) {
+      failed = true;
+      statusEl.textContent =
+        '搜索索引尚未生成：本地请先跑 npm run build 再 npm run preview；线上部署后自动可用。';
+      return null;
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+    );
+  }
+
+  async function runSearch(term) {
+    const pf = await loadPagefind();
+    if (!pf) return;
+
+    statusEl.textContent = '搜索中…';
+    const search = await pf.debouncedSearch(term);
+    if (search === null) return; // 期间又输入了新内容，交给下一次搜索
+
+    listEl.textContent = '';
+    if (search.results.length === 0) {
+      statusEl.textContent = `没有找到与「${term}」相关的内容`;
+      return;
+    }
+
+    statusEl.textContent = `找到 ${search.results.length} 条结果`;
+    const items = await Promise.all(search.results.slice(0, 20).map((r) => r.data()));
+
+    for (const item of items) {
+      const li = document.createElement('li');
+      li.className = 'search-result';
+      const title = escapeHtml(item.meta?.title || item.url);
+      // item.excerpt 由 Pagefind 处理过，可安全作为 innerHTML 使用
+      li.innerHTML = `<a class="search-result-title" href="${item.url}">${title}</a>
+        <p class="search-result-excerpt">${item.excerpt}</p>`;
+      listEl.appendChild(li);
+    }
+  }
+
+  let timer;
+  input.addEventListener('input', () => {
+    const term = input.value.trim();
+    window.clearTimeout(timer);
+    if (!term) {
+      listEl.textContent = '';
+      statusEl.textContent = '输入关键词开始搜索';
+      return;
+    }
+    timer = window.setTimeout(() => {
+      runSearch(term);
+    }, 250);
+  });
+
+  input.focus();
+</script>

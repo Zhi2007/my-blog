@@ -22,7 +22,8 @@ const fmt = (d: Date) =>
 ---
 
 <BaseLayout title={post.data.title} description={post.data.description}>
-  <article>
+  <!-- data-pagefind-body：只把这些正文内容纳入搜索索引，导航/页脚等自动跳过 -->
+  <article data-pagefind-body>
     <header>
       <h1>{post.data.title}</h1>
       <div class="meta">
@@ -34,6 +35,6 @@ const fmt = (d: Date) =>
 
     <Content />
 
-    <a class="back-link" href="/blog/">← 返回文章列表</a>
+    <a class="back-link" href="/blog/" data-pagefind-ignore>← 返回文章列表</a>
   </article>
 </BaseLayout>

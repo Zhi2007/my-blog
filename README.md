@@ -9,9 +9,10 @@
 | --- | --- |
 | 框架 | [Astro 7](https://astro.build)（默认静态输出，`dist/` 里全是纯 HTML/CSS） |
 | 内容 | Astro 内容集合（Content Collections），文章就是 `src/content/blog/*.md` |
-| 评论/搜索 | 未内置，需要可自行接 Giscus、Waline 等 |
+| 搜索 | [Pagefind](https://pagefind.app) 1.5：构建时扫一遍 HTML 生成静态索引，浏览器里检索，**不需要服务器或数据库** |
+| 评论 | 未内置，可自行接 Giscus（零维护，需 GitHub 账号）或 Waline / Workers+D1（访客免登录） |
 | 托管 | Cloudflare Workers 静态资源（`wrangler deploy`，免费额度：每天 10 万请求、2 万个静态文件） |
-| 附加能力 | `/rss.xml` 订阅、`sitemap-index.xml` 站点地图、404 页面 |
+| 附加能力 | `/rss.xml` 订阅、`sitemap-index.xml` 站点地图、站内搜索、404 页面 |
 
 ## 目录结构
 
@@ -20,6 +21,7 @@ my-blog/
 ├─ astro.config.mjs          # Astro 配置（site 域名、sitemap、Vite 依赖预构建）
 ├─ wrangler.jsonc            # Cloudflare 部署配置（把 dist/ 作为静态资源发布）
 ├─ package.json              # 脚本与依赖
+├─ .github/workflows/deploy.yml  # push 到 main 自动构建并部署
 ├─ public/                   # 原样拷贝到 dist/ 的静态文件（favicon、图片）
 └─ src/
    ├─ consts.ts              # 站点标题、描述、作者、导航（改这里）
@@ -31,11 +33,14 @@ my-blog/
    │  ├─ index.astro         # 首页（最新 8 篇）
    │  ├─ blog/index.astro    # 全部文章
    │  ├─ blog/[slug].astro   # 文章详情页
+   │  ├─ search.astro        # 站内搜索页
    │  ├─ about.astro         # 关于页
    │  ├─ 404.astro           # 404 页面
    │  └─ rss.xml.js          # RSS 订阅
    └─ styles/global.css      # 全站样式（自带浅色/深色自适应）
 ```
+
+> `npm run build` 的顺序是：Astro 构建出 `dist/`，然后用 Pagefind 扫一遍生成搜索索引到 `dist/pagefind/`。索引本身也是静态文件，一起被部署，不产生任何服务端成本。
 
 ## 1. 本地跑起来
 
@@ -75,10 +80,28 @@ draft: false
 
 文件名决定 URL：`my-first-post.md` → `/blog/my-first-post/`。
 
-## 3. 部署到 Cloudflare（免费）
+## 3. 站内搜索（已内置 Pagefind）
+
+搜页面在 `/search/`，导航栏也加了入口。工作方式：
+
+- **不需要服务器、不需要数据库**：索引在构建时生成，就是 `dist/pagefind/` 下的一堆静态文件。
+- **只索引正文**：文章页和关于页的 `<article>` 上标了 `data-pagefind-body`，所以导航、页脚、列表页、搜索页本身都不会进入索引，搜索结果更干净。
+- **中文可用**：构建时识别到 `lang="zh-CN"`，按词切分（例如 `每個月都` 会被切成 `每個`/`月`/`都`），支持多词组合和引号精确匹配。
+- **发新文章不用额外操作**：`npm run build` 会自动重建索引，GitHub Actions 部署时同理。
+
+本地要试搜索必须用构建后的产物（开发服务器里没有索引）：
 
 ```sh
-npm run deploy       # = astro build + wrangler deploy
+npm run build
+npm run preview      # 打开 http://localhost:4321/search/ 试搜索
+```
+
+想把某些内容排除出索引，给元素加 `data-pagefind-ignore` 即可；想让别的页面也能被搜到，给它加上 `data-pagefind-body`。
+
+## 4. 部署到 Cloudflare（免费）
+
+```sh
+npm run deploy       # = astro build + pagefind 建索引 + wrangler deploy
 ```
 
 第一次运行会打开浏览器让你登录 Cloudflare 账号并授权。成功后终端会打印：
@@ -107,7 +130,7 @@ https://my-blog.<你的 workers.dev 子域>.workers.dev
 - **Web Analytics**：免费，无需在页面里塞第三方统计脚本。
 - 想连 Git 自动部署：Workers & Pages 里连接 GitHub 仓库，构建命令 `npm run build`、输出目录 `dist`，以后 `git push` 即上线。
 
-## 4. 改成你自己的样子
+## 5. 改成你自己的样子
 
 | 想改什么 | 改哪里 |
 | --- | --- |
@@ -116,6 +139,7 @@ https://my-blog.<你的 workers.dev 子域>.workers.dev
 | 关于页文字、联系方式 | `src/pages/about.astro` |
 | 配色、字体、间距 | `src/styles/global.css`（颜色都在顶部 CSS 变量里，含深色模式） |
 | 网站图标 | `public/favicon.svg` |
+| 搜索页的样式 | `src/styles/global.css` 里 `.search-*` 那几段 |
 | 首页显示的文章条数 | `src/pages/index.astro` 里的 `posts.slice(0, 8)` |
 
 ## 常见问题
@@ -128,6 +152,16 @@ https://my-blog.<你的 workers.dev 子域>.workers.dev
 **`npm run dev` 报 `require is not defined`、启动很慢或 `transport invoke timed out`**
 多半是 Vite 的依赖预构建还没完成，内容配置就先被加载了。先跑一次 `npm run build`（它会把依赖预构建进 `node_modules/.vite`），再启动 `npm run dev`；也可以删掉 `node_modules/.vite`，用 `npm run dev -- --force` 强制重建缓存。
 在受限容器/沙箱里，Vite 的模块运行器可能拿不到进程间通道导致 dev 起不来，这时用 `npm run build` 构建后拿任意静态服务器预览 `dist/` 即可（构建产物就是最终上线的文件）。
+
+**搜索页提示"搜索索引尚未生成"**
+`npm run dev` 的开发服务器里没有索引（索引是构建产物）。跑 `npm run build` 后 `npm run preview`，或等部署上线后再试。
+
+**线上搜索无反应或控制台报模块 / MIME 错误**
+先确认 `dist/pagefind/` 已经一起部署（Actions 构建时会自动生成）。如果只有 `pagefind.js` 报 MIME 类型错误，说明托管方没把它当 JS 返回，可以在项目根目录加一个 `_headers` 文件（Workers 静态资源支持）：
+```
+/pagefind/pagefind.js
+  Content-Type: text/javascript
+```
 
 **`wrangler deploy` 提示 Worker 名称被占用**
 改 `wrangler.jsonc` 的 `name`。名称决定 `*.workers.dev` 子域，全局唯一。

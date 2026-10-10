@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
@@ -15,6 +15,7 @@
     "astro": "^7.3.8"
   },
   "devDependencies": {
+    "pagefind": "^1.5.2",
     "wrangler": "^4.149.0"
   }
 }

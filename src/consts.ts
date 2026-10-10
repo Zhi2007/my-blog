@@ -11,7 +11,7 @@ export const SITE = {
    * 留空则不加载统计脚本；在 Cloudflare 控制台 Web Analytics → 添加站点后，
    * 从给出的 JS 片段里把 token 复制到这里即可。步骤见 README。
    */
-  cfAnalyticsToken: '',
+  cfAnalyticsToken: '67aa9433062f4bfda024d65f7f1bfb40',
 };
 
 export const NAV = [

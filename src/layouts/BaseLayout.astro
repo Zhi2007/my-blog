@@ -1,6 +1,6 @@
 ---
 import { SITE, NAV } from '../consts';
-import LifeCountdown from '../components/LifeCountdown.astro';
+import DayProgress from '../components/DayProgress.astro';
 import TabTitle from '../components/TabTitle.astro';
 import '../styles/global.css';
 
@@ -58,7 +58,7 @@ const currentPath = Astro.url.pathname;
 
     <footer class="site-footer">
       <div class="wrap">
-        <LifeCountdown />
+        <DayProgress />
         <p>© {new Date().getFullYear()} {SITE.author} · 由 Astro 构建，托管在 Cloudflare Workers</p>
       </div>
     </footer>

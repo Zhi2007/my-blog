@@ -213,23 +213,24 @@ cover: ../../assets/cover-demo.png
 
 `cfAnalyticsToken` 留空时**不会加载任何脚本**，所以不配置也没有额外请求。注意 `workers.dev` 不在你自己的 Cloudflare zone 下，只能用这种"手动填 token"的方式，无法用自动注入。
 
-## 8. 小特效（人生倒计时 / 标签页标题）
+## 8. 小特效（今日进度 / 标签页标题）
 
 两个纯前端效果，配置都在 `src/consts.ts`，不需要服务器、不发任何请求。
 
-### 人生倒计时（页脚）
+### 今日进度（页脚）
 
 ```ts
-export const LIFE = {
-  birthDate: '',     // 出生日期 'YYYY-MM-DD'，留空则整块不渲染
-  lifeExpectancy: 80 // 预期寿命（岁）
+export const TODAY = {
+  label: '今日进度',   // 前面的文字标签
+  showRemaining: true  // 是否显示「距明天还有 时:分:秒」
 };
 ```
 
-- 页脚显示「人生进度 xx.xx% · 还剩 N 天」加一条进度条，每分钟刷新一次
-- 纯本地日期计算（`(end - now) / 86400000`），不依赖任何接口
-- **`birthDate` 留空时组件完全不渲染**，所以不填就不会公开这个信息
-- 组件在 `src/components/LifeCountdown.astro`，样式是 `global.css` 里的 `.life*`
+- 页脚显示「今日进度 [进度条] 50.000% · 距明天还有 11:59:59」，**每秒刷新**
+- 按**访客本地时区**计算：今天 00:00 → 明天 00:00 为 0→100%，中午 12 点正好 50%
+- 夏令时导致 23/25 小时的日子也按真实天数计算，逻辑天然正确
+- 不需要任何个人配置（不是生日/年龄那种）
+- 组件在 `src/components/DayProgress.astro`，样式是 `global.css` 里的 `.today*`
 
 ### 切换标签页时改标题
 

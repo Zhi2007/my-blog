@@ -209,8 +209,8 @@ article hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; 
   border-radius: 4px;
 }
 
-/* 页脚「人生倒计时」 */
-.life {
+/* 页脚「今日进度」 */
+.today {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -219,8 +219,8 @@ article hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; 
   font-size: 0.84rem;
   line-height: 1.4;
 }
-.life-title { color: var(--fg-muted); white-space: nowrap; }
-.life-bar {
+.today-title { color: var(--fg-muted); white-space: nowrap; }
+.today-bar {
   flex: 0 1 180px;
   height: 6px;
   overflow: hidden;
@@ -228,15 +228,15 @@ article hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; 
   border: 1px solid var(--border);
   border-radius: 999px;
 }
-.life-bar > i {
+.today-bar > i {
   display: block;
   width: 0;
   height: 100%;
   background: var(--accent);
   border-radius: 999px;
-  transition: width 0.6s ease;
+  transition: width 0.5s linear;
 }
-.life-text { color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.today-text { color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 
 @media (max-width: 600px) {
   body { font-size: 16px; }

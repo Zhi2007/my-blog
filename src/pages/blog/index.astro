@@ -8,10 +8,10 @@ const posts = (
 ).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="全部文章" description="按时间倒序排列的全部文章">
-  <section class="hero">
-    <h1>全部文章</h1>
-    <p>共 {posts.length} 篇</p>
-  </section>
+<BaseLayout
+  title="全部文章"
+  description="按时间倒序排列的全部文章"
+  bannerSubtitle={`共 ${posts.length} 篇`}
+>
   <PostList posts={posts} />
 </BaseLayout>

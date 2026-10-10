@@ -11,12 +11,7 @@ const posts = (
 const latest = posts.slice(0, 8);
 ---
 
-<BaseLayout>
-  <section class="hero">
-    <h1>{SITE.title}</h1>
-    <p>{SITE.description}</p>
-  </section>
-
+<BaseLayout bannerLarge bannerSubtitle={SITE.subtitle}>
   <h2 class="section-title">最新文章</h2>
   <PostList posts={latest} />
 

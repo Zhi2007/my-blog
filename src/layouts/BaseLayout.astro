@@ -9,16 +9,37 @@ interface Props {
   description?: string;
   /** 用于 RSS 等场景的发布时间 */
   pubDate?: Date;
+  /** 横幅大标题，默认用页面 title（没有则用站点标题） */
+  bannerTitle?: string;
+  /** 横幅副标题，默认用页面 description */
+  bannerSubtitle?: string;
+  /** 首页用更高的横幅 */
+  bannerLarge?: boolean;
 }
 
-const { title, description = SITE.description } = Astro.props;
+const {
+  title,
+  description = SITE.description,
+  bannerTitle = title ?? SITE.title,
+  bannerSubtitle = description,
+  bannerLarge = false,
+} = Astro.props;
+
 const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
 const currentPath = Astro.url.pathname;
+
+// 主题色相与可选背景图通过内联变量注入，其余样式全部由 CSS 派生
+const rootStyle = [
+  `--hue:${SITE.hue}`,
+  SITE.bannerImage ? `--banner-image:url('${SITE.bannerImage}')` : '',
+]
+  .filter(Boolean)
+  .join(';');
 ---
 
 <!doctype html>
-<html lang={SITE.lang}>
+<html lang={SITE.lang} style={rootStyle}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -34,8 +55,10 @@ const currentPath = Astro.url.pathname;
     <meta name="generator" content={Astro.generator} />
   </head>
   <body>
-    <header class="site-header">
-      <div class="wrap">
+    <div class="wallpaper" aria-hidden="true"></div>
+
+    <header class="navbar">
+      <div class="navbar-inner">
         <a class="brand" href="/">{SITE.title}</a>
         <nav class="site-nav">
           {
@@ -52,16 +75,23 @@ const currentPath = Astro.url.pathname;
       </div>
     </header>
 
-    <main class="wrap">
-      <slot />
-    </main>
+    <div class="page">
+      <section class:list={['banner', bannerLarge && 'banner-large']}>
+        <div class="banner-inner">
+          <h1 class="banner-title" data-pagefind-meta="title">{bannerTitle}</h1>
+          {bannerSubtitle && <p class="banner-subtitle">{bannerSubtitle}</p>}
+        </div>
+      </section>
 
-    <footer class="site-footer">
-      <div class="wrap">
+      <main class="content-card">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
         <TimeProgress />
         <p>© {new Date().getFullYear()} {SITE.author} · 由 Astro 构建，托管在 Cloudflare Workers</p>
-      </div>
-    </footer>
+      </footer>
+    </div>
 
     {/* Cloudflare Web Analytics：token 为空时不加载任何脚本 */}
     {

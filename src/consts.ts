@@ -1,11 +1,23 @@
 // 站点全局配置：改这里就能换标题、作者、导航和页脚
 export const SITE = {
   title: '我的博客',
+  /** 首页横幅上的副标题 */
+  subtitle: '用 Astro + Cloudflare Workers 搭建的个人博客',
   description: '用 Astro + Cloudflare Workers 搭建的个人博客',
   author: '博主',
   lang: 'zh-CN',
   // 与 astro.config.mjs 里的 site 保持一致
   url: 'https://my-blog.mc20070831.workers.dev',
+  /**
+   * 主题色相（0-360），整套配色由它派生（Firefly 同款 OKLCH 方案）：
+   * 165 青绿（默认）／200 青蓝／250 蓝紫／345 粉红／30 橙
+   */
+  hue: 165,
+  /**
+   * 横幅与壁纸图片：把图片放进 public/ 后填 '/wallpaper.webp' 这样的路径。
+   * 留空则使用主题色渐变，不产生任何图片请求。
+   */
+  bannerImage: '',
   /**
    * Cloudflare Web Analytics 的 token（免费、无 cookie）。
    * 留空则不加载统计脚本；在 Cloudflare 控制台 Web Analytics → 添加站点后，

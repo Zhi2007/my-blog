@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 
 interface Props {
   posts: CollectionEntry<'blog'>[];
@@ -15,14 +16,26 @@ const fmt = (d: Date) =>
   {
     posts.map((post) => (
       <li>
-        <a class="post-item" href={`/blog/${post.id}/`}>
-          <h2>{post.data.title}</h2>
-          <p>{post.data.description}</p>
-          <div class="meta">
-            <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
-            {post.data.tags.map((tag) => (
-              <span class="tag">#{tag}</span>
-            ))}
+        <a class:list={['post-item', post.data.cover && 'post-item-has-cover']} href={`/blog/${post.id}/`}>
+          {post.data.cover && (
+            <Image
+              class="post-item-cover"
+              src={post.data.cover}
+              alt=""
+              widths={[200, 400]}
+              sizes="200px"
+              loading="lazy"
+            />
+          )}
+          <div class="post-item-body">
+            <h2>{post.data.title}</h2>
+            <p>{post.data.description}</p>
+            <div class="meta">
+              <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+              {post.data.tags.map((tag) => (
+                <span class="tag">#{tag}</span>
+              ))}
+            </div>
           </div>
         </a>
       </li>

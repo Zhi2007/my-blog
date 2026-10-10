@@ -3,11 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title="关于" description={`关于 ${SITE.title}`}>
-  <section class="hero">
-    <h1>关于</h1>
-  </section>
-
+<BaseLayout title="关于" description={`关于 ${SITE.title}`} bannerSubtitle={`关于 ${SITE.title}`}>
   <article data-pagefind-body>
     <p>你好，我是{SITE.author}。这里是我的个人博客，用来记录技术笔记、读书笔记和一些随想。</p>
     <p>本站是纯静态站点：用 <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> 构建，

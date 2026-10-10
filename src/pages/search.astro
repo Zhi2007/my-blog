@@ -3,12 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title="搜索" description={`搜索 ${SITE.title} 的全部文章内容`}>
-  <section class="hero">
-    <h1>搜索</h1>
-    <p>输入关键词搜索全部文章，支持中文词、多词组合，以及用引号做精确匹配</p>
-  </section>
-
+<BaseLayout
+  title="搜索"
+  description={`搜索 ${SITE.title} 的全部文章内容`}
+  bannerSubtitle="支持中文分词、多词组合，以及用引号做精确匹配"
+>
   <div class="search-box">
     <input
       id="search-input"

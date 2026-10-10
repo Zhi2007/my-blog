@@ -6,6 +6,12 @@ export const SITE = {
   lang: 'zh-CN',
   // 与 astro.config.mjs 里的 site 保持一致
   url: 'https://my-blog.mc20070831.workers.dev',
+  /**
+   * Cloudflare Web Analytics 的 token（免费、无 cookie）。
+   * 留空则不加载统计脚本；在 Cloudflare 控制台 Web Analytics → 添加站点后，
+   * 从给出的 JS 片段里把 token 复制到这里即可。步骤见 README。
+   */
+  cfAnalyticsToken: '',
 };
 
 export const NAV = [

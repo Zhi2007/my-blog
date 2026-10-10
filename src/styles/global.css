@@ -134,7 +134,9 @@ article blockquote {
   border-radius: 0 var(--radius) var(--radius) 0;
   color: var(--fg-muted);
 }
-article pre {
+/* 说明：代码块现在由 Expressive Code 渲染（自带边框/背景/圆角/滚动），
+   所以这里只保留裸 <pre> 的兜底样式，不再覆盖 .expressive-code 内部的样式 */
+article > pre {
   background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);

@@ -59,5 +59,17 @@ const currentPath = Astro.url.pathname;
         <p>© {new Date().getFullYear()} {SITE.author} · 由 Astro 构建，托管在 Cloudflare Workers</p>
       </div>
     </footer>
+
+    {/* Cloudflare Web Analytics：token 为空时不加载任何脚本 */}
+    {
+      SITE.cfAnalyticsToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={`{"token": "${SITE.cfAnalyticsToken}"}`}
+        />
+      )
+    }
   </body>
 </html>

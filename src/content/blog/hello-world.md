@@ -3,6 +3,7 @@ title: 博客开张：用 Astro + Cloudflare 零成本上线
 description: 这个博客的技术选型和第一篇介绍——静态生成、全球 CDN、自动 HTTPS，一年成本只有域名钱。
 pubDate: 2026-10-09
 tags: ['公告', 'Cloudflare']
+cover: ../../assets/cover-demo.png
 ---
 
 欢迎来到我的博客。

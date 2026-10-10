@@ -10,7 +10,10 @@
 | 框架 | [Astro 7](https://astro.build)（默认静态输出，`dist/` 里全是纯 HTML/CSS） |
 | 内容 | Astro 内容集合（Content Collections），文章就是 `src/content/blog/*.md` |
 | 搜索 | [Pagefind](https://pagefind.app) 1.5：构建时扫一遍 HTML 生成静态索引，浏览器里检索，**不需要服务器或数据库** |
+| 代码块 | [Expressive Code](https://expressive-code.com)：复制按钮、语言标签、行号，深浅两套主题自动跟随系统 |
+| 图片 | Astro 内置 `astro:assets` + sharp：文章里的图片构建时自动压缩、转 WebP、输出多档尺寸 |
 | 评论 | [Giscus](https://giscus.app)：基于 GitHub Discussions，评论存在自己仓库里，**不需要服务器**；访客需登录 GitHub |
+| 统计 | Cloudflare Web Analytics（可选）：免费、无 cookie，填入 token 即启用 |
 | 托管 | Cloudflare Workers 静态资源（`wrangler deploy`，免费额度：每天 10 万请求、2 万个静态文件） |
 | 附加能力 | `/rss.xml` 订阅、`sitemap-index.xml` 站点地图、站内搜索、404 页面 |
 
@@ -21,10 +24,12 @@ my-blog/
 ├─ astro.config.mjs          # Astro 配置（site 域名、sitemap、Vite 依赖预构建）
 ├─ wrangler.jsonc            # Cloudflare 部署配置（把 dist/ 作为静态资源发布）
 ├─ package.json              # 脚本与依赖
+├─ ec.config.mjs             # 代码块（Expressive Code）主题与插件配置
 ├─ .github/workflows/deploy.yml  # push 到 main 自动构建并部署
 ├─ public/                   # 原样拷贝到 dist/ 的静态文件（favicon、图片）
 └─ src/
-   ├─ consts.ts              # 站点标题、描述、作者、导航（改这里）
+   ├─ consts.ts              # 站点标题、描述、作者、导航、统计 token（改这里）
+   ├─ assets/                # 需要优化的图片放这里（构建时自动转 WebP）
    ├─ content.config.ts      # 文章集合的字段定义（frontmatter schema）
    ├─ content/blog/*.md      # 文章本体
    ├─ layouts/BaseLayout.astro   # 全站 HTML 骨架（head、导航、页脚）
@@ -170,7 +175,43 @@ git push
 | 配色、字体、间距 | `src/styles/global.css`（颜色都在顶部 CSS 变量里，含深色模式） |
 | 网站图标 | `public/favicon.svg` |
 | 搜索页的样式 | `src/styles/global.css` 里 `.search-*` 那几段 |
+| 代码块主题、行号、复制按钮 | `ec.config.mjs` |
 | 首页显示的文章条数 | `src/pages/index.astro` 里的 `posts.slice(0, 8)` |
+
+## 7. 代码块、图片与访问统计
+
+### 代码块增强（Expressive Code）
+
+所有 Markdown 代码块由 [Expressive Code](https://expressive-code.com) 渲染：**复制按钮、语言标签、行号**一应俱全，深浅两套主题（github-light / github-dark）自动跟随系统设置。配置在 `ec.config.mjs`：
+
+- 全局关掉行号：把 `defaultProps.showLineNumbers` 改成 `false`
+- 单个代码块关掉行号：在代码围栏后写 `showLineNumbers=false`
+- 换主题：改 `themes` 数组（第一个是浅色、第二个是深色）
+- 想加折叠区块等插件：装 `@expressive-code/plugin-collapsible-sections` 后加进 `plugins`
+
+### 图片自动优化（astro:assets）
+
+不需要手动压图。把图片放进 `src/assets/`，在文章 frontmatter 里写相对路径：
+
+```yaml
+cover: ../../assets/cover-demo.png
+```
+
+构建时会自动生成 480 / 760 / 1200 三档 WebP 并输出 `srcset`，浏览器按屏幕宽度挑最合适的一张。示例见 `hello-world.md` 与 `src/assets/cover-demo.png`（换成自己的图或直接删掉都行）。
+
+- 建议原图宽度 ≥ 1200px、体积 ≤ 2MB，PNG / JPG 都可以
+- 想放到页面其它位置，用 `<Image src={...} alt="..." />`（从 `astro:assets` 导入）
+- 只有 `src/` 里的图片会被优化；`public/` 里的文件是原样拷贝、不做处理
+
+### 访问统计（Cloudflare Web Analytics，可选）
+
+免费、无 cookie、不收集个人信息，脚本由 Cloudflare 自己的 CDN 提供：
+
+1. Cloudflare 控制台 → **Web Analytics** → **Add a site** → hostname 填 `my-blog.mc20070831.workers.dev`（或你的自有域名）
+2. 创建后点 **Manage site**，从给出的 JS 片段里复制 `data-cf-beacon` 中的 **token**
+3. 把 token 填到 `src/consts.ts` 的 `SITE.cfAnalyticsToken`，提交推送
+
+`cfAnalyticsToken` 留空时**不会加载任何脚本**，所以不配置也没有额外请求。注意 `workers.dev` 不在你自己的 Cloudflare zone 下，只能用这种"手动填 token"的方式，无法用自动注入。
 
 ## 常见问题
 

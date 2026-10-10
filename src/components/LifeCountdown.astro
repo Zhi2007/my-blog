@@ -1,0 +1,58 @@
+---
+import { LIFE } from '../consts';
+
+// birthDate 为空时整块不渲染，线上不会出现占位数据
+const show = Boolean(LIFE.birthDate);
+---
+
+{
+  show && (
+    <div
+      class="life"
+      id="life"
+      data-birth={LIFE.birthDate}
+      data-years={String(LIFE.lifeExpectancy)}
+    >
+      <span class="life-title">人生进度</span>
+      <span class="life-bar" aria-hidden="true">
+        <i id="life-bar-fill" />
+      </span>
+      <span class="life-text" id="life-text">
+        计算中…
+      </span>
+    </div>
+  )
+}
+
+{show && <script type="application/json" id="life-config" set:html={JSON.stringify(LIFE)} />}
+
+<script>
+  const box = document.getElementById('life');
+  const configEl = document.getElementById('life-config');
+  const textEl = document.getElementById('life-text');
+  const fillEl = document.getElementById('life-bar-fill');
+
+  if (box && configEl && textEl) {
+    const cfg = JSON.parse(configEl.textContent || '{}');
+    const birth = new Date(cfg.birthDate);
+    const years = Number(cfg.lifeExpectancy) || 80;
+    const end = new Date(birth);
+    end.setFullYear(birth.getFullYear() + years);
+
+    const render = () => {
+      const now = Date.now();
+      const total = end.getTime() - birth.getTime();
+      const passed = now - birth.getTime();
+      const pct = Math.min(100, Math.max(0, (passed / total) * 100));
+      const leftDays = Math.max(0, Math.floor((end.getTime() - now) / 86400000));
+
+      textEl.textContent = `${pct.toFixed(2)}% · 还剩 ${leftDays.toLocaleString('zh-CN')} 天`;
+      if (fillEl) fillEl.style.width = `${pct}%`;
+      box.setAttribute('title', `出生于 ${cfg.birthDate}，按 ${years} 岁计算`);
+    };
+
+    render();
+    // 每分钟更新一次即可，没必要每秒
+    window.setInterval(render, 60000);
+  }
+</script>

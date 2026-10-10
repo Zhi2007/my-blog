@@ -213,6 +213,34 @@ cover: ../../assets/cover-demo.png
 
 `cfAnalyticsToken` 留空时**不会加载任何脚本**，所以不配置也没有额外请求。注意 `workers.dev` 不在你自己的 Cloudflare zone 下，只能用这种"手动填 token"的方式，无法用自动注入。
 
+## 8. 小特效（人生倒计时 / 标签页标题）
+
+两个纯前端效果，配置都在 `src/consts.ts`，不需要服务器、不发任何请求。
+
+### 人生倒计时（页脚）
+
+```ts
+export const LIFE = {
+  birthDate: '',     // 出生日期 'YYYY-MM-DD'，留空则整块不渲染
+  lifeExpectancy: 80 // 预期寿命（岁）
+};
+```
+
+- 页脚显示「人生进度 xx.xx% · 还剩 N 天」加一条进度条，每分钟刷新一次
+- 纯本地日期计算（`(end - now) / 86400000`），不依赖任何接口
+- **`birthDate` 留空时组件完全不渲染**，所以不填就不会公开这个信息
+- 组件在 `src/components/LifeCountdown.astro`，样式是 `global.css` 里的 `.life*`
+
+### 切换标签页时改标题
+
+```ts
+export const AWAY_TITLES = ['喂，别走啊 👀', '快回来看看嘛', '页面还在，人没了？'];
+```
+
+- 用 Page Visibility API 判断访客是否切走：离开时每 2.5 秒轮播一条，回来立刻恢复原标题
+- 数组留空就不启用；想换成「(1) 新消息」之类只改这个数组
+- 组件在 `src/components/TabTitle.astro`
+
 ## 常见问题
 
 **构建时报 `require is not defined`（与 yaml / picomatch 有关）**

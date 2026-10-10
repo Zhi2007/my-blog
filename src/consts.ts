@@ -21,6 +21,20 @@ export const NAV = [
   { href: '/about/', label: '关于' },
 ];
 
+/**
+ * 页脚「人生倒计时」。
+ * birthDate 留空则整块不渲染（避免线上出现占位数据）；填上后自动显示进度条和剩余天数。
+ */
+export const LIFE = {
+  /** 出生日期，格式 YYYY-MM-DD，例如 '2007-03-15'；留空则页脚不显示倒计时 */
+  birthDate: '',
+  /** 预期寿命（岁），用来计算进度和剩余天数 */
+  lifeExpectancy: 80,
+};
+
+/** 切到别的标签页时，浏览器标题轮播的文案；留空数组则不启用这个效果 */
+export const AWAY_TITLES = ['喂，别走啊 👀', '快回来看看嘛', '页面还在，人没了？'];
+
 // Giscus 评论：基于 GitHub Discussions，数据存在自己仓库里，不需要服务器。
 // 配置步骤见 README「评论」一节；categoryId 留空时文章页只显示提示，不会报错。
 export const GISCUS = {

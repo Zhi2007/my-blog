@@ -1,5 +1,7 @@
 ---
 import { SITE, NAV } from '../consts';
+import LifeCountdown from '../components/LifeCountdown.astro';
+import TabTitle from '../components/TabTitle.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -56,6 +58,7 @@ const currentPath = Astro.url.pathname;
 
     <footer class="site-footer">
       <div class="wrap">
+        <LifeCountdown />
         <p>© {new Date().getFullYear()} {SITE.author} · 由 Astro 构建，托管在 Cloudflare Workers</p>
       </div>
     </footer>
@@ -71,5 +74,8 @@ const currentPath = Astro.url.pathname;
         />
       )
     }
+
+    {/* 切到别的标签页时把标题换成轮播文案 */}
+    <TabTitle />
   </body>
 </html>

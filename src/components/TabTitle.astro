@@ -1,0 +1,41 @@
+---
+import { AWAY_TITLES } from '../consts';
+
+// 只有配置了文案才注入脚本
+const titles = AWAY_TITLES.filter((title) => title && title.trim());
+---
+
+{titles.length > 0 && (
+  <script type="application/json" id="away-title-config" set:html={JSON.stringify(titles)} />
+)}
+
+<script>
+  const configEl = document.getElementById('away-title-config');
+
+  if (configEl) {
+    const titles = JSON.parse(configEl.textContent || '[]');
+
+    if (Array.isArray(titles) && titles.length > 0) {
+      const original = document.title;
+      let timer = null;
+      let index = 0;
+
+      // visibilitychange 在切标签、最小化、手机切后台时都会触发
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          index = 0;
+          document.title = titles[index++ % titles.length];
+          timer = window.setInterval(() => {
+            document.title = titles[index++ % titles.length];
+          }, 2500);
+        } else {
+          if (timer !== null) {
+            window.clearInterval(timer);
+            timer = null;
+          }
+          document.title = original;
+        }
+      });
+    }
+  }
+</script>

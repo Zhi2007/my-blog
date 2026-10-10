@@ -20,10 +20,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -33,6 +33,23 @@ jobs:
 
       - name: Build site
         run: npm run build
+
+      # 部署前先确认仓库里配好了 Cloudflare 凭据；缺了就给一句能看懂的中文提示，
+      # 而不是抛出一长串 wrangler 的英文报错。
+      - name: Check Cloudflare credentials
+        if: github.event_name != 'pull_request'
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=""
+          [ -z "$CF_API_TOKEN" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "$CF_ACCOUNT_ID" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::仓库缺少 Secret:$missing。请在 GitHub 仓库 → Settings → Secrets and variables → Actions → Secrets 标签页添加（注意不是 Variables 标签页）。"
+            exit 1
+          fi
+          echo "Cloudflare 凭据已配置 ✓"
 
       # Pull Request 只做构建校验，不部署
       - name: Deploy to Cloudflare Workers
